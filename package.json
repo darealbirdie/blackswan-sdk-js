@@ -1,6 +1,6 @@
 ﻿{
   "name": "blackswan-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "description": "TypeScript SDK for BlackSwan Protocol - fetch credit dashboards, reputation scores, and loan history from Soulbound Token contracts",
   "main": "dist/index.js",
