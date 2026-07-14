@@ -8,7 +8,7 @@ export interface BlackSwanConfig {
 
 export interface CreditDashboard {
   trustRatio: number;
-  trustTierScore: "A" | "B" | "C" | "D" | "E";
+  trustTier: "AAA" | "AA" | "A" | "BBB" | "BB" | "B";
   currentApr: number;
   totalBorrowedUsd: bigint;
   totalRepaidUsd: bigint;
@@ -19,6 +19,7 @@ export interface CreditDashboard {
   defaults: number;
   totalBorrowedUsdFormatted: string;
   totalRepaidUsdFormatted: string;
+  tier: number;
 }
 
 export interface Reputation {
@@ -28,4 +29,5 @@ export interface Reputation {
   defaults: number;
   loansTaken: number;
   trustRatio: number;
+  tier: number;
 }

@@ -28,6 +28,15 @@ export class BlackSwanClient {
     return tokenId > 0;
   }
 
+  async hasSoul(wallet: string): Promise<boolean> {
+    return await this.sbtContract.hasSoul(wallet);
+  }
+
+  async tokenOf(wallet: string): Promise<number> {
+    const tokenId = await this.sbtContract.tokenOf(wallet);
+    return Number(tokenId);
+  }
+
   async getTrustRatio(wallet: string): Promise<number> {
     const ratio = await this.sbtContract.getTrustRatio(wallet);
     return Number(ratio);
@@ -43,12 +52,12 @@ export class BlackSwanClient {
       interestRepaidUsd,
       successfulLoans,
       defaults,
-      _tier
+      tier
     ] = await this.sbtContract.getCreditDashboard(wallet);
 
     return {
       trustRatio: Number(trustRatio),
-      trustTierScore: this.tierFromScore(Number(trustRatio)),
+      trustTier: this.tierFromScore(Number(trustRatio)),
       currentApr: Number(currentApr),
       totalBorrowedUsd,
       totalRepaidUsd,
@@ -58,12 +67,60 @@ export class BlackSwanClient {
       successfulLoans: Number(successfulLoans),
       defaults: Number(defaults),
       totalBorrowedUsdFormatted: this.formatUsdRaw(totalBorrowedUsd),
-      totalRepaidUsdFormatted: this.formatUsdRaw(totalRepaidUsd)
+      totalRepaidUsdFormatted: this.formatUsdRaw(totalRepaidUsd),
+      tier: Number(tier)
+    };
+  }
+
+  async getCreditDashboardByTokenId(tokenId: number): Promise<{
+    user: string;
+    trustRatio: number;
+    trustTier: "AAA" | "AA" | "A" | "BBB" | "BB" | "B";
+    currentApr: number;
+    totalBorrowedUsd: bigint;
+    totalRepaidUsd: bigint;
+    principalRepaidUsd: bigint;
+    interestRepaidUsd: bigint;
+    interestRepaidUsdFormatted: string;
+    successfulLoans: number;
+    defaults: number;
+    totalBorrowedUsdFormatted: string;
+    totalRepaidUsdFormatted: string;
+    tier: number;
+  }> {
+    const [
+      user,
+      trustRatio,
+      currentApr,
+      totalBorrowedUsd,
+      totalRepaidUsd,
+      principalRepaidUsd,
+      interestRepaidUsd,
+      successfulLoans,
+      defaults,
+      tier
+    ] = await this.sbtContract.getCreditDashboardByTokenId(tokenId);
+
+    return {
+      user,
+      trustRatio: Number(trustRatio),
+      trustTier: this.tierFromScore(Number(trustRatio)),
+      currentApr: Number(currentApr),
+      totalBorrowedUsd,
+      totalRepaidUsd,
+      principalRepaidUsd,
+      interestRepaidUsd,
+      interestRepaidUsdFormatted: this.formatUsdRaw(interestRepaidUsd),
+      successfulLoans: Number(successfulLoans),
+      defaults: Number(defaults),
+      totalBorrowedUsdFormatted: this.formatUsdRaw(totalBorrowedUsd),
+      totalRepaidUsdFormatted: this.formatUsdRaw(totalRepaidUsd),
+      tier: Number(tier)
     };
   }
 
   async getReputation(wallet: string): Promise<Reputation> {
-    const [repaidVolume, successfulLoans, defaults, loansTaken, _tier, trustRatio] =
+    const [repaidVolume, successfulLoans, defaults, loansTaken, tier, trustRatio] =
       await this.sbtContract.getReputation(wallet);
 
     return {
@@ -72,7 +129,33 @@ export class BlackSwanClient {
       successfulLoans: Number(successfulLoans),
       defaults: Number(defaults),
       loansTaken: Number(loansTaken),
-      trustRatio: Number(trustRatio)
+      trustRatio: Number(trustRatio),
+      tier: Number(tier)
+    };
+  }
+
+  async getReputationByTokenId(tokenId: number): Promise<{
+    user: string;
+    repaidVolume: bigint;
+    repaidVolumeFormatted: string;
+    successfulLoans: number;
+    defaults: number;
+    loansTaken: number;
+    trustRatio: number;
+    tier: number;
+  }> {
+    const [user, repaidVolume, successfulLoans, defaults, loansTaken, tier, trustRatio] =
+      await this.sbtContract.getReputationByTokenId(tokenId);
+
+    return {
+      user,
+      repaidVolume,
+      repaidVolumeFormatted: this.formatUsdWei(repaidVolume),
+      successfulLoans: Number(successfulLoans),
+      defaults: Number(defaults),
+      loansTaken: Number(loansTaken),
+      trustRatio: Number(trustRatio),
+      tier: Number(tier)
     };
   }
 
@@ -81,7 +164,7 @@ export class BlackSwanClient {
     return Number(dashboard.currentApr);
   }
 
-  async getTrustTier(wallet: string): Promise<"A" | "B" | "C" | "D" | "E"> {
+  async getTrustTier(wallet: string): Promise<"AAA" | "AA" | "A" | "BBB" | "BB" | "B"> {
     const trustRatio = await this.getTrustRatio(wallet);
     return this.tierFromScore(trustRatio);
   }
@@ -119,11 +202,12 @@ export class BlackSwanClient {
     return `$${formatted.toFixed(2)}`;
   }
 
-  private tierFromScore(score: number): "A" | "B" | "C" | "D" | "E" {
-    if (score >= 9000) return "A";
-    if (score >= 8000) return "B";
-    if (score >= 7000) return "C";
-    if (score >= 6000) return "D";
-    return "E";
+  private tierFromScore(score: number): "AAA" | "AA" | "A" | "BBB" | "BB" | "B" {
+    if (score >= 9000) return "AAA";
+    if (score >= 8000) return "AA";
+    if (score >= 7000) return "A";
+    if (score >= 6000) return "BBB";
+    if (score >= 5000) return "BB";
+    return "B";
   }
 }

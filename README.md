@@ -14,12 +14,12 @@ npm install blackswan-sdk
 import { AMOY_CONTRACTS, SEPOLIA_CONTRACTS } from "blackswan-sdk";
 
 // Amoy (Polygon Testnet)
-AMOY_CONTRACTS.P2PLENDING   // 0x7E04C0a283d372537E547086D37642776199C1DC
-AMOY_CONTRACTS.BLACKSWANSBT  // 0x6665e5E15Ee295d9de05C6D57c629F33653687D7
+AMOY_CONTRACTS.P2PLENDING   // 0x85DF6de0C868927c0600D96b10F31777D5f26C82
+AMOY_CONTRACTS.BLACKSWANSBT  // 0x4bdF83dA3f6cce61dfDDAce51c92E696f8e00171
 
 // Sepolia Testnet
-SEPOLIA_CONTRACTS.P2PLENDING  // 0x20D2E08E283FF4052B2B02A3475dda1B320cD26f
-SEPOLIA_CONTRACTS.BLACKSWANSBT // 0xf8D2F43227Ea25a7fD0B34E1b74FF6FF2722879F
+SEPOLIA_CONTRACTS.P2PLENDING  // 0x0595e518b218E66C84ae195020df080809f41535
+SEPOLIA_CONTRACTS.BLACKSWANSBT // 0xc7432A7973a2c58feBA0B194bbbbf22947946BBc
 ```
 
 ## Usage
@@ -37,13 +37,14 @@ const client = new BlackSwanClient({
 const dashboard = await client.getCreditDashboard(wallet);
 // {
 //   trustRatio: 7700,
-//   trustTierScore: 'C',
+//   trustTier: 'A',
 //   currentApr: 142,
 //   totalBorrowedUsd: '...',
 //   totalRepaidUsd: '...',
 //   interestRepaidUsd: '...',
 //   successfulLoans: 1,
-//   defaults: 0
+//   defaults: 0,
+//   tier: 0
 // }
 ```
 
@@ -63,23 +64,28 @@ const dashboard = await client.getCreditDashboard(wallet);
 ## API Methods
 
 - `hasSoulboundToken(wallet)` - Check if wallet has SBT (returns true/false)
-- `getCreditDashboard(wallet)` - Get trustRatio, trustTierScore (A-E), currentApr, amounts, loans
-- `getReputation(wallet)` - Get repaidVolume, loans, trustRatio
+- `hasSoul(wallet)` - Returns bool if wallet owns SBT
+- `tokenOf(wallet)` - Returns SBT token ID
+- `getCreditDashboard(wallet)` - Get trustRatio, trustTier (AAA-B), currentApr, amounts, loans, tier
+- `getCreditDashboardByTokenId(tokenId)` - Same as above, looks up by SBT token
+- `getReputation(wallet)` - Get repaidVolume, loans, trustRatio, tier
+- `getReputationByTokenId(tokenId)` - Same, looks up by token
 - `getCurrentApr(wallet)` - Get current APR
-- `getTrustTier(wallet)` - Get trust tier score (A, B, C, D, E)
-- `getTrustRatio(wallet)` - Get trust ratio (raw number)
+- `getTrustTier(wallet)` - Get trust tier (AAA, AA, A, BBB, BB, B)
+- `getTrustRatio(wallet)` - Get trust ratio (0-10000)
 - `getCreditHistory(wallet)` - Get loan history with formatted USD amounts
 - `getCurrentRisk(wallet)` - Get current risk score
 
-## Trust Tier Score
+## Trust Tier
 
 | Score | Tier |
 |-------|------|
-| >= 9000 | A |
-| >= 8000 | B |
-| >= 7000 | C |
-| >= 6000 | D |
-| < 6000 | E |
+| >= 9000 | AAA |
+| >= 8000 | AA |
+| >= 7000 | A |
+| >= 6000 | BBB |
+| >= 5000 | BB |
+| < 5000 | B |
 
 ## License
 
